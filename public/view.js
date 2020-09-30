@@ -1,6 +1,6 @@
 var db = firebase.firestore();
 
-db.collection("upload").get().then((querySnapshot) => {
+db.collection("upload").orderBy("publishDate", "desc").get().then((querySnapshot) => {
   querySnapshot.forEach((doc) => {
     console.log(`${doc.id} => ${doc.data()}`, doc.data(), doc.data().insertDate.toDate() );
     
