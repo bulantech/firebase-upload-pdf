@@ -4,7 +4,8 @@ body {
 
 .modal-delete,
 .modal-login {
-	width: 320px;
+  /* width: 320px; */
+  width: 400px;
 }
 
 .modal-delete .modal-content,
