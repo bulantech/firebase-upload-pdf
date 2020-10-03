@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Bootstrap Example</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.22/js/dataTables.bootstrap4.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.22/css/dataTables.bootstrap4.min.css">
+
+  <link rel="stylesheet" href="style.css">
+
+  <script src="https://www.gstatic.com/firebasejs/7.21.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.21.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.21.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.21.1/firebase-storage.js"></script>
+  <script src="init.js"></script>
+
+</head>
+<body>
+
+<!-- <div class="container">
+  <div class="row">
+    <div class="col-sm-4">
+      <button type="button" class="btn btn-outline-secondary d-none" id="logout">Logout</button>
+    </div>
+
+  </div>
+</div> -->
+
+<div id="divTable" class="mx-4 my-4 d-none">
+  <div class="text-center mt-2">
+    <!-- <label class="font-weight-bold text-success">Admin</label> -->
+    <button type="button" class="btn btn-sm btn-success" id="addฺNow" data-toggle="modal" data-target="#addModal">+ เพิ่มประกาศ</button>
+    <button type="button" class="btn btn-sm btn-outline-secondary" id="logout">Logout</button>
+  </div>
+  <!-- <hr> -->
+
+  <table id="myTable" class="table table-striped table-bordered " cellspacing="0" width="100%">
+    <thead>
+      <tr>
+        <th class="th-sm">_id
+        </th>
+        <th class="th-sm">หัวเรื่อง
+        </th>
+        <th class="th-sm">ชนิด
+        </th>
+        <th class="th-sm">สถานะ
+        </th>
+        <th class="th-sm">เอกสารแนบ
+        </th>
+        <th class="th-sm">วันที่ประกาศ
+        </th>
+        <th class="th-sm">ปรับปรุง
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- <tr>
+        <td class="th-sm">td หัวเรื่อง
+        </td>
+        <td class="th-sm">td ชนิด
+        </td>
+        <td class="th-sm">td สถานะ
+        </td>
+        <td class="th-sm">td เอกสารแนบ
+        </td>
+        <td class="th-sm">td วันที่ประกาศ
+        </td>
+        <td class="th-sm">td ปรับปรุง
+        </td>
+      </tr> -->
+    </tbody>
+    <tfoot>
+      <tr>
+        <th class="th-sm">_id
+        </th>
+        <th class="th-sm">หัวเรื่อง
+        </th>
+        <th class="th-sm">ชนิด
+        </th>
+        <th class="th-sm">สถานะ
+        </th>
+        <th class="th-sm">เอกสารแนบ
+        </th>
+        <th class="th-sm">วันที่ประกาศ
+        </th>
+        <th class="th-sm">ปรับปรุง
+        </th>
+      </tr>
+    </tfoot>
+  </table>
+</div>
+
+<!-- login Modal HTML -->
+<div id="loginModal" class="modal fade" data-keyboard="false" data-backdrop="static">
+	<div class="modal-dialog modal-login">
+		<div class="modal-content">
+      <!-- <form action="/#" method="post"> -->
+      <form id="loginForm">
+				<div class="modal-header">				
+					<h4 class="modal-title">Login</h4>
+					<!-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button> -->
+				</div>
+				<div class="modal-body">				
+					<div class="form-group">
+						<label>Email</label>
+						<input id="inputEmail" type="email" class="form-control" required="required">
+					</div>
+					<div class="form-group">
+						<div class="clearfix">
+							<label>Password</label>
+							<!-- <a href="#" class="float-right text-muted"><small>Forgot?</small></a> -->
+						</div>
+						
+						<input id="inputPassword" type="password" class="form-control" required="required">
+					</div>
+				</div>
+				<div class="modal-footer justify-content-between">
+        <!-- <div class="modal-footer"> -->
+					<label class="text-danger" id="loginError"></label>
+					<input type="submit" class="btn btn-primary" value="Login">
+				</div>
+			</form>
+		</div>
+	</div>
+</div>     
+
+<!-- Add Modal HTML -->
+<div id="addModal" class="modal fade" data-keyboard="false" data-backdrop="static">
+	<div class="modal-dialog modal-delete">
+		<div class="modal-content">
+      <!-- <form action="/#" method="post"> -->
+      <form id="addForm">
+				<div class="modal-header">				
+					<h4 class="modal-title">เพิ่มประกาศ</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body">				
+					<div class="form-group">
+						<label>Email</label>
+						<input id="inputEmail" type="email" class="form-control" required="required">
+					</div>
+					<div class="form-group">
+						<div class="clearfix">
+							<label>Password</label>
+							<!-- <a href="#" class="float-right text-muted"><small>Forgot?</small></a> -->
+						</div>
+						
+						<input id="inputPassword" type="password" class="form-control" required="required">
+					</div>
+				</div>
+				<div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-lg btn-secondary" data-dismiss="modal">ยกเลิก</button>
+					<button type="button" class="btn btn-lg btn-success" name="add">เพิ่ม</button>	
+				</div>
+			</form>
+		</div>
+	</div>
+</div>     
+
+<!-- Delete Modal HTML -->
+<div id="deleteModal" class="modal fade show" data-keyboard="true" data-backdrop="true">
+	<div class="modal-dialog modal-delete">
+		<div class="modal-content">
+      <!-- <form > -->
+				<div class="modal-header">				
+					<h4 class="modal-title">ยืนยันการลบ</h4>
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				</div>
+				<div class="modal-body text-center">			
+					modal-body
+				</div>
+				<div class="modal-footer justify-content-between">
+        <!-- <div class="modal-footer"> -->
+          <!-- <label class="text-danger" id="loginError"></label> -->
+          <button type="button" class="btn btn-lg btn-secondary" data-dismiss="modal">ยกเลิก</button>
+					<button type="button" class="btn btn-lg btn-danger" id="delete">ลบ</button>
+				</div>
+			<!-- </form> -->
+		</div>
+	</div>
+</div>     
+
+<script src="admin.js"></script>
+
+</body>
+</html>
