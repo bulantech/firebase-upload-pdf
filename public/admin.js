@@ -2,6 +2,7 @@ var dTable = null
 var db = firebase.firestore();
 var dataAll = []
 var file = null
+var userLogin = null
 
 $( document ).ready(function() {
   dTable = $('#myTable').DataTable( {
@@ -108,6 +109,8 @@ initApp = () => {
       const isAnonymous = user.isAnonymous;
       const uid = user.uid;
       const providerData = user.providerData;
+
+      userLogin = user
       
       console.log('uid =>', uid);
       $('#loginModal').modal('hide');
@@ -116,9 +119,13 @@ initApp = () => {
       $( "#inputEmail" ).val('')
       $( "#inputPassword" ).val('')
 
-      dTable.clear().draw();
-      getDatabase()
+      dTable.clear().draw();      
       $( "#divTable" ).removeClass('d-none');
+
+      $( "#userEmail" ).text(email)
+
+      checkUserRole(email)      
+      // getDatabase()
 
     } else {
       // User is signed out.
@@ -132,11 +139,64 @@ initApp = () => {
   // [END authstatelistener]
 }
 
+checkUserRole = (email) => {
+  // Update user login
+  db.collection("users").doc(email).update({
+    lastLogin: firebase.firestore.Timestamp.fromDate(new Date()),
+  })
+  .then(function() {
+    console.log("users Document successfully updated!");
+    // Get role
+    db.collection("users").doc(email).get()
+    .then(function(doc) {
+      if (doc.exists) {
+        console.log("Document data:", doc.data());
+        (doc.data().role === 'root') ? getDatabase('root') : getDatabase(email)
+      } else {
+        console.log("No such document!");
+      }
+    }).catch(function(error) {
+      console.log("Error getting document:", error);
+    });
+
+  })
+  .catch(function(error) {
+    console.error("users Error updating document: ", error);
+
+    // set new doc
+    db.collection("users").doc(email).set({
+      lastLogin: firebase.firestore.Timestamp.fromDate(new Date()),
+      role: "editor"
+    })
+    .then(function() {
+      console.log("Document written: ", );
+      checkUserRole(email)
+    })
+    .catch(function(error) {
+      console.error("Error adding document: ", error);
+    });
+
+  });
+}
+
 toggleSignIn = () => {
   console.log('toggleSignIn..');
   if (firebase.auth().currentUser) {
+    // Update lastLogout
+    db.collection("users").doc(userLogin.email).update({
+      lastLogout: firebase.firestore.Timestamp.fromDate(new Date()),
+    })
+    .then(function() {
+      console.log("users Document successfully updated!")  
+    })
+    .catch(function(error) {
+      console.error("users Error updating document: ", error);
+    });
+
     firebase.auth().signOut();
+    userLogin = null
     $('#loginModal').modal('show');
+
   } else {
     const email = $( "#inputEmail" ).val()
     const password = $( "#inputPassword" ).val()
@@ -152,8 +212,11 @@ toggleSignIn = () => {
   }
 }
 
-getDatabase = () => {
-  db.collection("upload").orderBy("publishDate", "desc").get().then((querySnapshot) => {
+getDatabase = (email) => {
+  const docRef = db.collection("upload").orderBy("publishDate", "desc")
+  // let query = null
+  const query = (email==='root') ? docRef.where("publishDate", "!=", false) : docRef.where("updateBy", "==", email)
+  query.get().then((querySnapshot) => {
     querySnapshot.forEach((doc) => {
       // console.log(`${doc.id} => ${doc.data()}`, doc.data(), doc.data().insertDate.toDate() );
       const topic = doc.data().topic
@@ -247,10 +310,11 @@ addData = () => {
       const insertDate = firebase.firestore.Timestamp.fromDate(new Date());    
       const updateDate = firebase.firestore.Timestamp.fromDate(new Date());   
       const fileName = file.name
-      const fileUrl = url        
-      const data = { topic, status, type, publishDate, fileName, filePath, fileUrl, insertDate, updateDate }
+      const fileUrl = url   
+      const updateBy = userLogin.email     
+      const data = { topic, status, type, publishDate, fileName, filePath, fileUrl, insertDate, updateDate, updateBy }
       // console.log('data =>',date , data);
-
+      
       // Add a new document with a generated id.
       db.collection("upload").add(data)
       .then(function(docRef) {
@@ -309,6 +373,8 @@ editData = () => {
   const btnDelete = '<button type="button" class="btn btn-danger btn-sm mx-1" onClick="showDelete(\'' + topic+ '\')">ลบ</button>'
   const editDelete = '<span class="btn-group">' + btnEdit + btnDelete + '</span>'
 
+  const updateBy = userLogin.email
+
   if(file) {
     console.log('editData upload..')
     const storageRef = firebase.storage().ref('upload');
@@ -328,7 +394,7 @@ editData = () => {
         // console.log('File available at', url);
         
         fileUrl = url
-        const data = { topic, status, type, publishDate, fileName, filePath, fileUrl, insertDate, updateDate }
+        const data = { topic, status, type, publishDate, fileName, filePath, fileUrl, insertDate, updateDate, updateBy }
         const fileLink = '<a target="_blank" rel="noopener noreferrer" href="' +fileUrl+ '">' +fileName+ '</a>'
 
         db.collection("upload").doc(id).update(data)
@@ -350,7 +416,7 @@ editData = () => {
     });
   }
   else {
-    const data = { topic, status, type, publishDate, fileName, filePath, fileUrl, insertDate, updateDate }
+    const data = { topic, status, type, publishDate, fileName, filePath, fileUrl, insertDate, updateDate, updateBy }
 
     db.collection("upload").doc(id).update(data)
     .then(function() {
