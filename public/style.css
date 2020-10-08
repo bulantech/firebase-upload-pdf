@@ -1,5 +1,6 @@
 body {
 	font-family: 'Varela Round', sans-serif;
+	/*font-size: 17px;*/
 }
 
 .modal-delete,
@@ -81,4 +82,10 @@ body {
 }
 .modal-login .hint-text a {
 	color: #999;
+}
+
+.btn-cm {
+  padding: 1px 4px;
+  font-size: 12px;
+
 }

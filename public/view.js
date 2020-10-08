@@ -12,7 +12,8 @@ db.collection("upload").orderBy("publishDate", "desc").get().then((querySnapshot
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const publishDate = doc.data().publishDate.toDate().toLocaleDateString('th-TH', options).split('ที่')[1]
     const fileUrl = doc.data().fileUrl
-    const btn = '<button type="button" class="btn btn-sm btn-outline-primary ml-2" onclick="window.open(\''+ fileUrl +'\')" >ดูเอกสาร</button>'
+    // const btn = '<button type="button" class="btn btn-sm btn-outline-primary ml-2" onclick="window.open(\''+ fileUrl +'\')" >ดูเอกสาร</button>'
+    const btn = '<button type="button" class="btn btn-cm btn-outline-primary ml-2" onclick="window.open(\''+ fileUrl +'\')" >ดูเอกสาร</button>'
     // const btn = '<span class="badge badge-primary ml-2">ดูเอกสาร</span>'
     const str = '<p class="mb-0">' + doc.data().topic + ' ณ วันที่ ' + publishDate + btn + '</p>'
     switch(type) {
